@@ -2,14 +2,14 @@ package org.example;
 
 import java.util.*;
 
-// ====== Abstract Game ======
+// ===== AbstractGame =====
 abstract class AbstractGame {
     abstract void setPlayers(Player p1, Player p2);
     abstract boolean gameOver();
-    abstract boolean move(int from, int to);
+    abstract String move(int from, int to);
 }
 
-// ====== Player ======
+// ===== Player =====
 class Player {
     String name;
     int side;
@@ -20,13 +20,14 @@ class Player {
     }
 }
 
-// ====== Chess ======
+// ===== Chess =====
 class Chess {
     String name;
     int weight;
     int side;
     int loc;
     boolean revealed = false;
+    boolean captured = false;
 
     public Chess(String name, int weight, int side, int loc) {
         this.name = name;
@@ -36,14 +37,16 @@ class Chess {
     }
 
     public String toString() {
+        if (captured) return "Ｘ";
         if (!revealed) return "＿";
         return name;
     }
 }
 
-// ====== ChessGame ======
+// ===== ChessGame =====
 class ChessGame extends AbstractGame {
     Chess[] board = new Chess[32];
+    boolean[] XGrid = new boolean[32];
     Player p1, p2;
     Player currentPlayer;
     Scanner sc = new Scanner(System.in);
@@ -79,7 +82,11 @@ class ChessGame extends AbstractGame {
         Arrays.fill(grid, "＿");
 
         for (Chess c : board) {
-            grid[c.loc] = c.toString();
+            if (c.loc >= 0) grid[c.loc] = c.toString();
+        }
+
+        for (int i = 0; i < 32; i++) {
+            if (XGrid[i]) grid[i] = "Ｘ";
         }
 
         System.out.println("\n目前玩家：" + currentPlayer.name);
@@ -101,31 +108,41 @@ class ChessGame extends AbstractGame {
         return row * 8 + col;
     }
 
-    public boolean move(int from, int to) {
+    // ===== move =====
+    public String move(int from, int to) {
         Chess c1 = null, c2 = null;
-
         for (Chess c : board) {
             if (c.loc == from) c1 = c;
             if (c.loc == to) c2 = c;
         }
 
-        if (c1 == null || !c1.revealed) return false;
+        if (c1 == null) return "來源格沒有棋子！";
+        if (!c1.revealed) return "來源棋子尚未翻開！";
 
-        if (c2 != null && c2.revealed) {
-            if (c1.side == c2.side) return false;
-            if (c1.weight < c2.weight) return false;
-        }
+        if (c2 == null) return "目的格沒有棋子！";
+        if (!c2.revealed) return "目的棋子尚未翻開！";
 
+        if (c1.side == c2.side) return "不能吃自己的棋子！";
+
+        if (c1.weight < c2.weight) return "棋子太輕，無法吃掉目標棋子！";
+
+        // 標記原格 X
+        XGrid[from] = true;
+
+        // 吃掉目的格
+        c2.captured = true;
+        c2.loc = -1;
+
+        // 移動棋子
         c1.loc = to;
-        if (c2 != null) c2.loc = -1;
 
-        return true;
+        return ""; // 成功
     }
 
     public boolean gameOver() {
         int side0 = 0, side1 = 0;
         for (Chess c : board) {
-            if (c.loc != -1) {
+            if (!c.captured) {
                 if (c.side == 0) side0++;
                 else side1++;
             }
@@ -142,7 +159,6 @@ class ChessGame extends AbstractGame {
             showAllChess();
             System.out.print("輸入位置：");
             String input = sc.next();
-
             int pos = parsePos(input);
 
             Chess target = null;
@@ -150,7 +166,10 @@ class ChessGame extends AbstractGame {
                 if (c.loc == pos) target = c;
             }
 
-            if (target == null) continue;
+            if (target == null) {
+                System.out.println("格子沒有棋子，請重新輸入！");
+                continue;
+            }
 
             if (!target.revealed) {
                 target.revealed = true;
@@ -160,17 +179,20 @@ class ChessGame extends AbstractGame {
                 String input2 = sc.next();
                 int to = parsePos(input2);
 
-                if (move(pos, to)) {
+                String result = move(pos, to);
+                if (result.isEmpty()) {
                     switchPlayer();
                 } else {
-                    System.out.println("移動失敗！");
+                    System.out.println("移動失敗！原因：" + result);
                 }
             }
         }
+        showAllChess();
         System.out.println("Game Over!");
     }
 }
 
+// ===== Main =====
 public class Main {
     public static void main(String[] args) {
         ChessGame game = new ChessGame();
