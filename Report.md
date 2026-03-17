@@ -59,7 +59,7 @@
 ```java
 while (!gameOver()) {
     showAllChess();
-    System.out.print("輸入位置 (如 A2): ");
+    System.out.print("輸入位置：");
     String input = sc.next();
 }
 ```
@@ -77,7 +77,7 @@ private void switchPlayer() {
 棋子名稱：已翻開
 每次操作後畫面會更新
 ```java
-目前玩家: 玩家1
+目前玩家：玩家1
    1   2   3   4  5   6   7   8
 A  ＿  兵  ＿  車  Ｘ  ＿  象  Ｘ
 B  Ｘ  ＿  包  Ｘ  士  ＿  馬  Ｘ
