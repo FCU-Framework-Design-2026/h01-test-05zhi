@@ -117,13 +117,9 @@ class ChessGame extends AbstractGame {
         }
 
         if (c1 == null) return "來源格沒有棋子！";
-        if (!c1.revealed) return "來源棋子尚未翻開！";
-
         if (c2 == null) return "目的格沒有棋子！";
         if (!c2.revealed) return "目的棋子尚未翻開！";
-
         if (c1.side == c2.side) return "不能吃自己的棋子！";
-
         if (c1.weight < c2.weight) return "棋子太輕，無法吃掉目標棋子！";
 
         // 標記原格 X
