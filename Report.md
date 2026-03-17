@@ -72,29 +72,76 @@ private void switchPlayer() {
 ```
 
 ### 棋盤顯示範例
-＿：未翻開棋子
-棋子名稱：已翻開
-每次操作後畫面會更新
-```java
-目前玩家：玩家1
-   1   2   3   4  5   6   7   8
-A  ＿  兵  ＿  車  Ｘ  ＿  象  Ｘ
-B  Ｘ  ＿  包  Ｘ  士  ＿  馬  Ｘ
-C  象  兵  Ｘ  車  馬  ＿  ＿  將
-D  Ｘ  包  ＿  士  兵  Ｘ  ＿  Ｘ
-```
+棋子名稱：已翻開  
+＿：未翻開棋子  
+Ｘ：沒有棋子的格子  
+
+- 初始畫面  
+  ![初始畫面](img/image1.png)
+- 吃掉一個棋子  
+  ![吃掉一個棋子](img/image2.png)
 
 ### 移動與吃子判斷
-不可吃同一陣營棋子，小棋子不能吃大棋子。
+- 不可吃同一陣營棋子 
+- 小棋子不能吃大棋子 
+- 原格移走後顯示 Ｘ 
+- 目的格必須有棋子，否則移動失敗
 ```java
-if (c2 != null && c2.revealed) {
-        if (c1.side == c2.side) return false;
-        if (c1.weight < c2.weight) return false;
+    public String move(int from, int to) {
+    Chess c1 = null, c2 = null;
+    for (Chess c : board) {
+        if (c.loc == from) c1 = c;
+        if (c.loc == to) c2 = c;
+    }
+    
+    ...
+    
+    // 標記原格 X
+    XGrid[from] = true;
+
+    // 吃掉目的格
+    c2.captured = true;
+    c2.loc = -1;
+
+    // 移動棋子
+    c1.loc = to;
+
+    return ""; // 成功
 }
 ```
 
-### SS初始畫面
-
+### 移動與吃子判斷
+每次移動失敗時會提示原因
+- 格子沒有棋子，請重新輸入  
+  ![格子沒有棋子](img/image3.png)
+- 目的格沒有棋子  
+  ![目的格沒有棋子](img/image4.png)
+- 目的棋子尚未翻開  
+  ![目的棋子尚未翻開](img/image5.png)
+- 不能吃自己的棋子  
+  ![不能吃自己的棋子](img/image6.png)
+- 棋子太輕，無法吃掉目標棋子  
+  ![棋子太輕](img/image7.png)
+```java
+public void play() {
+    ...
+    if (target == null) {
+        System.out.println("格子沒有棋子，請重新輸入！");
+        continue;
+    }
+    ...
+    }
+```
+```java
+public String move(int from, int to) {
+    ...
+    if (c2 == null) return "目的格沒有棋子！";
+    if (!c2.revealed) return "目的棋子尚未翻開！";
+    if (c1.side == c2.side) return "不能吃自己的棋子！";
+    if (c1.weight < c2.weight) return "棋子太輕，無法吃掉目標棋子！";
+    ...
+}
+```
 
 ## AI 使用狀況與心得
 ### 使用層級
@@ -117,7 +164,7 @@ if (c2 != null && c2.revealed) {
 ### 手動完成（沒有使用 AI）的部分
 - 加入玩家輪流機制、顯示目前玩家
 - 報告撰寫與內容整理
-- 部分邏輯閱讀與修改（例如調整輸出格式）
+- 調整輸出畫面（空格、被吃掉的棋子）
 - 理解並測試程式執行流程
 
 ### 心得
